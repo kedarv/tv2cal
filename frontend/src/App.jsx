@@ -22,7 +22,6 @@ function App() {
 
   const handleEdit = (e, list) => {
     e.preventDefault();
-    console.log(list);
     setEditingList(list);
     setIsModalOpen(true);
   }
