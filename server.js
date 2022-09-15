@@ -156,7 +156,10 @@ fastify.get('/cal/:id', async (request, reply) => {
     events.filter(event => event.air_date).map(event => {
         calendar.createEvent({
             start: DateTime.fromISO(event['air_date']),
-            description: `s${event['season_number']}e${event['episode_number']}`,
+            description: {
+                plain: `s${event['season_number']}e${event['episode_number']}`,
+                html: `s${event['season_number']}e${event['episode_number']}`,
+            },
             allDay: true,
             summary: `${allShows.find(s => s['show_id'] == event['show_id'])['name']} - ${event['name']}`,
         });
