@@ -1,0 +1,23 @@
+{
+  "name": "tvcal",
+  "version": "1.0.0",
+  "description": "tvcal api server",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@fastify/cors": "^8.1.0",
+    "@fastify/env": "^4.1.0",
+    "axios": "^0.27.2",
+    "fastify": "^4.5.3",
+    "ical-generator": "^3.5.1",
+    "luxon": "^3.0.3",
+    "sequelize": "^6.21.6",
+    "sqlite3": "^5.1.0"
+  },
+  "type": "module"
+}
