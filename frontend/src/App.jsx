@@ -90,7 +90,7 @@ function App() {
 
   return (
     <>
-      <ToastContainer position="top-center" className="p-3" style={{"zIndex": 1}}>
+      <ToastContainer position="top-center" className="p-3" style={{ "zIndex": 1 }}>
         <Toast onClose={() => setShow(false)} show={show} delay={3000} autohide>
           <Toast.Header>
             <strong className="me-auto">Success</strong>
@@ -116,27 +116,31 @@ function App() {
                       You'll need to remember this to edit your list in the future
                     </Form.Text>
                   </Form.Group>
-                  <AsyncTypeahead
-                    id="async-search"
-                    isLoading={isLoading}
-                    onInputChange={handleInputChange}
-                    onSearch={handleSearch}
-                    multiple
-                    options={options}
-                    placeholder="Search for a TV Show"
-                    renderMenuItemChildren={(option) => (
-                      <div key={option.id}>
-                        <span>{option.label}</span>
-                      </div>
-                    )}
-                    useCache={true}
-                    caseSensitive={false}
-                    onChange={(selected) => setSelected(selected)}
-                    ref={typeaheadRef}
-                  />
-
+                  <Form.Group className="mb-3" controlId="formEmail">
+                    <AsyncTypeahead
+                      id="async-search"
+                      isLoading={isLoading}
+                      onInputChange={handleInputChange}
+                      onSearch={handleSearch}
+                      multiple
+                      options={options}
+                      placeholder="Search for a TV Show"
+                      renderMenuItemChildren={(option) => (
+                        <div key={option.id}>
+                          <span>{option.label}</span>
+                        </div>
+                      )}
+                      useCache={true}
+                      caseSensitive={false}
+                      onChange={(selected) => setSelected(selected)}
+                      ref={typeaheadRef}
+                    />
+                    <Form.Text className="text-muted">
+                      Click the search result or use the enter key to add the result to your list
+                    </Form.Text>
+                  </Form.Group>
                   <Button variant="primary" type="submit" className="mt-3" disabled={isButtonDisabled}>
-                    {isButtonDisabled ? 'Working...' : 'Submit'}
+                    {isButtonDisabled ? 'Working...' : 'Submit List'}
                   </Button>
                 </Form>
               </Card.Body>
