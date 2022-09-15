@@ -55,17 +55,15 @@ const List = sequelize.define('List', {
     },
     name: DataTypes.STRING,
     shows: DataTypes.TEXT,
-    email: {
-        type: DataTypes.STRING,
-        get() {
-            return undefined;
-        }
-    }
+    email: DataTypes.STRING,
 }, {
     uniqueKeys: {
         Items_unique: {
             fields: ['name']
         }
+    },
+    defaultScope: {
+        attributes: { exclude: ['email'] },
     }
 });
 
@@ -187,8 +185,7 @@ fastify.get('/search', {
     return res.data['results'].filter(result => result['vote_count'] > 10);
 });
 
-
-fastify.post('/create', {
+const listCreateSchema = {
     schema: {
         body: {
             type: 'object',
@@ -217,12 +214,63 @@ fastify.post('/create', {
             }
         }
     }
-}, async (request, reply) => {
+};
+
+const listUpdateSchema = {
+    schema: {
+        body: {
+            type: 'object',
+            required: ['name', 'shows', 'email', 'id'],
+            properties: {
+                id: {
+                    type: 'string'
+                },
+                name: {
+                    type: 'string',
+                    maxLength: 50,
+                    minLength: 1
+                },
+                email: {
+                    type: 'string',
+                    minLength: 1
+                },
+                shows: {
+                    type: 'array',
+                    minItems: 1,
+                    items: {
+                        type: 'object',
+                        properties: {
+                            id: { type: 'integer' },
+                            name: { type: 'string' }
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
+fastify.post('/create', listCreateSchema, async (request, reply) => {
     await List.create({
         name: request.body.name,
         shows: JSON.stringify(request.body.shows),
         email: request.body.email,
     });
+    await fetchShows(request.body.shows);
+    reply.code(200);
+})
+
+fastify.post('/update', listUpdateSchema, async (request, reply) => {
+    const list = await List.unscoped().findOne({ where: { id: request.body.id } });
+    if (list.email !== request.body.email) {
+        const err = new Error()
+        err.statusCode = 403
+        err.message = 'email did not match records'
+        throw err
+    }
+    list.name = request.body.name;
+    list.shows = JSON.stringify(request.body.shows);
+    await list.save();
     await fetchShows(request.body.shows);
     reply.code(200);
 })
