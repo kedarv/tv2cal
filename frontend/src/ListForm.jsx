@@ -16,7 +16,7 @@ async function makeAndHandleRequest(query) {
   const resp = await (await fetch(`${API_BASE}/search?search=${query}`)).json();
   return resp.map((i) => ({
     id: i.id,
-    label: `${i.name} (${dayjs(i.first_air_date).format("YYYY")})`,
+    label: `${i.name} (${dayjs(i.first_air_date).format('YYYY')})`
   }));
 }
 
@@ -25,11 +25,11 @@ function ListForm({ list, fetchLists, standaloneForm }) {
   const [show, setShow] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState([]);
-  const [selected, setSelected] = useState(list && JSON.parse(list.shows) || []);
+  const [selected, setSelected] = useState((list && JSON.parse(list.shows)) || []);
   const [query, setQuery] = useState('');
-  const [value, setValue] = useState(list?.name || "");
-  const [email, setEmail] = useState("");
-  const [alertText, setAlertText] = useState("");
+  const [value, setValue] = useState(list?.name || '');
+  const [email, setEmail] = useState('');
+  const [alertText, setAlertText] = useState('');
   const typeaheadRef = useRef();
 
   const onSubmit = async (e) => {
@@ -54,19 +54,19 @@ function ListForm({ list, fetchLists, standaloneForm }) {
       });
     }
     if (resp.status === 200) {
-      setValue("");
-      setQuery("");
+      setValue('');
+      setQuery('');
       setSelected([]);
       typeaheadRef.current?.clear();
-      toast.success(list ? "List Updated" : "List Created")
+      toast.success(list ? 'List Updated' : 'List Created');
       fetchLists();
-      setEmail("");
+      setEmail('');
       setIsButtonDisabled(false);
     } else {
       setIsButtonDisabled(false);
-      toast.error(`Something went wrong: ${(await resp.json())['message']}`)
+      toast.error(`Something went wrong: ${(await resp.json())['message']}`);
     }
-  }
+  };
 
   const handleInputChange = (q) => {
     setQuery(q);
@@ -87,14 +87,26 @@ function ListForm({ list, fetchLists, standaloneForm }) {
     <Form onSubmit={onSubmit}>
       <Form.Group className="mb-3" controlId="formListName">
         <Form.Label>List Name</Form.Label>
-        <Form.Control type="text" placeholder="Enter List Name" value={value} onChange={e => setValue(e.target.value)} />
+        <Form.Control
+          type="text"
+          placeholder="Enter List Name"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
       </Form.Group>
       <Form.Group className="mb-3" controlId="formEmail">
-        <Form.Label>{list ? "Verify Email" : "Email"}</Form.Label>
-        <Form.Control type="text" placeholder="Enter Email" value={email} onChange={e => setEmail(e.target.value)} />
-        {!list && (<Form.Text className="text-muted">
-          You'll need to remember this to edit your list in the future
-        </Form.Text>)}
+        <Form.Label>{list ? 'Verify Email' : 'Email'}</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Enter Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        {!list && (
+          <Form.Text className="text-muted">
+            You'll need to remember this to edit your list in the future
+          </Form.Text>
+        )}
       </Form.Group>
       <Form.Group className="mb-3" controlId="formEmail">
         <AsyncTypeahead
@@ -129,19 +141,22 @@ function ListForm({ list, fetchLists, standaloneForm }) {
   return (
     <>
       <Toaster />
-      {standaloneForm ? innerForm : (
+      {standaloneForm ? (
+        innerForm
+      ) : (
         <Container fluid className="mt-3">
           <Row>
             <Col md={{ span: 4, offset: 4 }}>
-              <h1 className="h3">tv2cal <small className="text-muted">(track your shows in your calendar)</small></h1>
+              <h1 className="h3">
+                tv2cal <small className="text-muted">(track your shows in your calendar)</small>
+              </h1>
               <Card>
-                <Card.Body>
-                  {innerForm}
-                </Card.Body>
+                <Card.Body>{innerForm}</Card.Body>
               </Card>
             </Col>
           </Row>
-        </Container>)}
+        </Container>
+      )}
     </>
   );
 }

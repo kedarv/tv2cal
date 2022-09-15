@@ -14,21 +14,26 @@ function App() {
   const fetchLists = async () => {
     const resp = await (await fetch(`${API_BASE}/lists`)).json();
     setLists(resp);
-  }
+  };
 
   useEffect(() => {
     fetchLists();
-  }, [])
+  }, []);
 
   const handleEdit = (e, list) => {
     e.preventDefault();
     setEditingList(list);
     setIsModalOpen(true);
-  }
+  };
 
   return (
     <>
-      <EditModal isOpen={isModalOpen} setIsModalOpen={setIsModalOpen} list={editingList} fetchLists={fetchLists} />
+      <EditModal
+        isOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        list={editingList}
+        fetchLists={fetchLists}
+      />
       <ListForm fetchLists={fetchLists} standaloneForm={false} />
       <Lists lists={lists} handleEdit={handleEdit} />
     </>
