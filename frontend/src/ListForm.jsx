@@ -92,15 +92,17 @@ function ListForm({ list, fetchLists, standaloneForm }) {
           placeholder="Enter List Name"
           value={value}
           onChange={(e) => setValue(e.target.value)}
+          required
         />
       </Form.Group>
       <Form.Group className="mb-3" controlId="formEmail">
         <Form.Label>{list ? 'Verify Email' : 'Email'}</Form.Label>
         <Form.Control
-          type="text"
+          type="email"
           placeholder="Enter Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
         {!list && (
           <Form.Text className="text-muted">
