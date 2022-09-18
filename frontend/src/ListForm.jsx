@@ -147,8 +147,8 @@ function ListForm({ list, fetchLists, standaloneForm }) {
         <Container fluid className="mt-3">
           <Row>
             <Col md={{ span: 4, offset: 4 }}>
-              <h1 className="h3">
-                tv2cal<small className="text-muted">(track your shows in your calendar)</small>
+              <h1 className="h4">
+                tv2cal&nbsp;<small className="text-muted">track your shows in your calendar</small>
               </h1>
               <Card>
                 <Card.Body>{innerForm}</Card.Body>

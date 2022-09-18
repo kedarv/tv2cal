@@ -5,6 +5,7 @@ import Lists from './Lists';
 import EditModal from './EditModal';
 import DeleteModal from './DeleteModal';
 import { API_BASE } from './utils';
+import Container from 'react-bootstrap/Container';
 
 function App() {
   const [lists, setLists] = useState([]);
@@ -34,7 +35,7 @@ function App() {
   };
 
   return (
-    <>
+    <Container className="mb-3">
       <EditModal
         isOpen={isEditModalOpen}
         setIsModalOpen={setIsEditModalOpen}
@@ -49,7 +50,7 @@ function App() {
       />
       <ListForm fetchLists={fetchLists} standaloneForm={false} />
       <Lists lists={lists} handleEdit={handleEdit} handleDelete={handleDelete} />
-    </>
+    </Container>
   );
 }
 
