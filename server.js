@@ -106,7 +106,7 @@ const fetchShows = async (shows) => {
             created = true;
         }
 
-        if (created || getUnixTimestamp() > queriedShow['updated_at'] + 86400) {
+        if (created || getUnixTimestamp() > queriedShow['updated_at'] + 21600) {
             for (let i = 1; i <= queriedShow['seasons']; i++) {
                 const seasonRes = await axios.get(`https://api.themoviedb.org/3/tv/${queriedShow['show_id']}/season/${i}`, { params: { api_key: fastify.config.API_KEY } });
                 for (const episode of seasonRes.data['episodes']) {
