@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { AsyncTypeahead } from 'react-bootstrap-typeahead';
 import fetch from 'isomorphic-fetch';
 import Container from 'react-bootstrap/Container';
@@ -22,14 +22,12 @@ async function makeAndHandleRequest(query) {
 
 function ListForm({ list, fetchLists, standaloneForm }) {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-  const [show, setShow] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState([]);
   const [selected, setSelected] = useState((list && JSON.parse(list.shows)) || []);
   const [query, setQuery] = useState('');
   const [value, setValue] = useState(list?.name || '');
   const [email, setEmail] = useState('');
-  const [alertText, setAlertText] = useState('');
   const typeaheadRef = useRef();
 
   const onSubmit = async (e) => {
@@ -150,7 +148,7 @@ function ListForm({ list, fetchLists, standaloneForm }) {
           <Row>
             <Col md={{ span: 4, offset: 4 }}>
               <h1 className="h3">
-                tv2cal <small className="text-muted">(track your shows in your calendar)</small>
+                tv2cal<small className="text-muted">(track your shows in your calendar)</small>
               </h1>
               <Card>
                 <Card.Body>{innerForm}</Card.Body>

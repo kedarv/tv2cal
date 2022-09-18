@@ -88,9 +88,17 @@ sequelize.sync();
 const BASE_URL = "https://api.themoviedb.org/3/";
 
 fastify.get('/', async (request, reply) => {
-    return "it is working";
+    return "tv2cal is running";
 })
 
+const validateEmail = async (list, email) => {
+    if (list.email !== email) {
+        const err = new Error()
+        err.statusCode = 403
+        err.message = 'email did not match records'
+        throw err
+    }
+}
 const fetchShows = async (shows) => {
     for (const show of shows) {
         let created = false;
@@ -263,19 +271,39 @@ fastify.post('/create', listCreateSchema, async (request, reply) => {
     reply.code(200);
 })
 
+const listDeleteSchema = {
+    schema: {
+        body: {
+            type: 'object',
+            required: ['email', 'id'],
+            properties: {
+                id: {
+                    type: 'string'
+                },
+                email: {
+                    type: 'string',
+                    minLength: 1
+                },
+            }
+        }
+    }
+};
+
 fastify.post('/update', listUpdateSchema, async (request, reply) => {
     const list = await List.unscoped().findOne({ where: { id: request.body.id } });
-    if (list.email !== request.body.email) {
-        const err = new Error()
-        err.statusCode = 403
-        err.message = 'email did not match records'
-        throw err
-    }
+    await validateEmail(list, request.body.email);
     list.name = request.body.name;
     list.shows = JSON.stringify(request.body.shows);
     await list.save();
     await fetchShows(request.body.shows);
     reply.code(200);
 })
+
+fastify.post('/delete', listDeleteSchema, async (request, reply) => {
+    const list = await List.unscoped().findOne({ where: { id: request.body.id } });
+    await validateEmail(list, request.body.email);
+    await list.destroy();
+    reply.code(200);
+});
 
 await fastify.listen({ port: fastify.config.PORT, host: "0.0.0.0" });

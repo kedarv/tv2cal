@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import fetch from 'isomorphic-fetch';
-import dayjs from 'dayjs';
 import ListForm from './ListForm';
 import Lists from './Lists';
 import EditModal from './EditModal';
+import DeleteModal from './DeleteModal';
 import { API_BASE } from './utils';
 
 function App() {
   const [lists, setLists] = useState([]);
-  const [editingList, setEditingList] = useState({});
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [managingList, setManagingList] = useState({});
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchLists = async () => {
     const resp = await (await fetch(`${API_BASE}/lists`)).json();
@@ -22,20 +23,32 @@ function App() {
 
   const handleEdit = (e, list) => {
     e.preventDefault();
-    setEditingList(list);
-    setIsModalOpen(true);
+    setManagingList(list);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDelete = (e, list) => {
+    e.preventDefault();
+    setManagingList(list);
+    setIsDeleteModalOpen(true);
   };
 
   return (
     <>
       <EditModal
-        isOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
-        list={editingList}
+        isOpen={isEditModalOpen}
+        setIsModalOpen={setIsEditModalOpen}
+        list={managingList}
+        fetchLists={fetchLists}
+      />
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        setIsModalOpen={setIsDeleteModalOpen}
+        list={managingList}
         fetchLists={fetchLists}
       />
       <ListForm fetchLists={fetchLists} standaloneForm={false} />
-      <Lists lists={lists} handleEdit={handleEdit} />
+      <Lists lists={lists} handleEdit={handleEdit} handleDelete={handleDelete} />
     </>
   );
 }

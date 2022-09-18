@@ -6,7 +6,7 @@ import Card from 'react-bootstrap/Card';
 import dayjs from 'dayjs';
 import { API_BASE } from './utils';
 
-function Lists({ lists, handleEdit }) {
+function Lists({ lists, handleEdit, handleDelete }) {
   return (
     <Container fluid className="mt-3">
       <Row>
@@ -42,8 +42,18 @@ function Lists({ lists, handleEdit }) {
                       className="text-reset text-decoration-none"
                       onClick={(e) => handleEdit(e, list)}
                     >
-                      edit
+                      [edit
                     </a>
+                    &nbsp;|&nbsp;
+                    <a
+                      href="#"
+                      role="button"
+                      className="text-reset text-decoration-none"
+                      onClick={(e) => handleDelete(e, list)}
+                    >
+                      delete
+                    </a>
+                    ]
                   </small>
                 </Card.Footer>
               </Card>
