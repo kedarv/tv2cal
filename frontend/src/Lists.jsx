@@ -35,7 +35,7 @@ function Lists({ lists, handleEdit, handleDelete }) {
                 </Card.Body>
                 <Card.Footer>
                   <small className="text-muted">
-                    Updated {dayjs(list['updated_at']).format('MMMM D, YYYY')} -{' '}
+                    Updated {dayjs(list['updatedAt']).format('MMMM D, YYYY')} -{' '}
                     <a
                       href="#"
                       role="button"
