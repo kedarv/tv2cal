@@ -5,8 +5,10 @@ import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import dayjs from 'dayjs';
 import { API_BASE } from './utils';
+import { useAuth } from './AuthProvider';
 
 function Lists({ lists, handleEdit, handleDelete }) {
+  const { user } = useAuth();
   return (
     <Container fluid className="mt-3">
       <Row>

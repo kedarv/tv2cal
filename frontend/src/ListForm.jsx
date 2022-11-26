@@ -144,12 +144,9 @@ function ListForm({ list, fetchLists, standaloneForm }) {
       {standaloneForm ? (
         innerForm
       ) : (
-        <Container fluid className="mt-3">
+        <Container fluid>
           <Row>
             <Col md={{ span: 4, offset: 4 }}>
-              <h1 className="h4">
-                tv2cal&nbsp;<small className="text-muted">track your shows in your calendar</small>
-              </h1>
               <Card>
                 <Card.Body>{innerForm}</Card.Body>
               </Card>
