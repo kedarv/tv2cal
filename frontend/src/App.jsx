@@ -13,20 +13,23 @@ import { useAuth } from './AuthProvider';
 
 function App() {
   const { email } = useAuth();
-  const [lists, setLists] = useState([]);
+  const [lists, setLists] = useState({
+    unauthedLists: [],
+    authedLists: []
+  });
   const [managingList, setManagingList] = useState({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const fetchLists = async () => {
-    // TODO: pass user in here if exists
-    const resp = await (await fetch(`${API_BASE}/lists`)).json();
+  const fetchLists = async (email) => {
+    console.log(email);
+    const resp = await (await fetch(`${API_BASE}/lists?email=${encodeURIComponent(email)}`)).json();
     setLists(resp);
   };
 
   useEffect(() => {
-    fetchLists();
-  }, []);
+    fetchLists(email);
+  }, [email]);
 
   const handleEdit = (e, list) => {
     e.preventDefault();
@@ -63,8 +66,7 @@ function App() {
           </Col>
         </Row>
       </Container>
-      {!email && <LoginForm />}
-      <ListForm fetchLists={fetchLists} standaloneForm={false} />
+      {email ? <ListForm fetchLists={fetchLists} standaloneForm={false} /> : <LoginForm />}
       <Lists lists={lists} handleEdit={handleEdit} handleDelete={handleDelete} />
     </Container>
   );

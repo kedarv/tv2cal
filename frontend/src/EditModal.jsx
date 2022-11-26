@@ -1,8 +1,10 @@
 import React from 'react';
 import Modal from 'react-bootstrap/Modal';
 import ListForm from './ListForm';
+import { useAuth } from './AuthProvider';
 
 function EditModal({ list, isOpen, setIsModalOpen, fetchLists }) {
+  const { email } = useAuth();
   return (
     <Modal show={isOpen} onHide={() => setIsModalOpen(false)}>
       <Modal.Header closeButton>
@@ -14,7 +16,7 @@ function EditModal({ list, isOpen, setIsModalOpen, fetchLists }) {
           list={list}
           fetchLists={() => {
             setIsModalOpen(false);
-            fetchLists();
+            fetchLists(email);
           }}
         />
       </Modal.Body>

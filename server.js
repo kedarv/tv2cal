@@ -181,7 +181,27 @@ fastify.get("/cal/:id", async (request, reply) => {
 });
 
 fastify.get("/lists", async (request, reply) => {
-  return await List.findAll();
+  const email = request?.query?.email;
+  if(email) {
+    return {
+      "unauthedLists": await List.findAll({
+        where: {
+          email: {
+            [Op.ne]: email,
+          }
+        }
+      }),
+      "authedLists": await List.findAll({
+        where: {
+          email: email,
+        }
+      }),
+    }
+  }
+  return {
+    "unauthedLists": await List.findAll(),
+    "authedLists": []
+  };
 });
 
 fastify.get("/search", searchSchema, async (request, reply) => {

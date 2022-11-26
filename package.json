@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "watch": "nodemon server.js"
   },
   "author": "",
   "license": "MIT",
@@ -19,5 +20,6 @@
     "sequelize": "^6.21.6",
     "sqlite3": "^5.1.0"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {}
 }

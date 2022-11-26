@@ -5,11 +5,12 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { API_BASE } from './utils';
 import toast, { Toaster } from 'react-hot-toast';
+import { useAuth } from './AuthProvider';
 
 function DeleteModal({ list, isOpen, setIsModalOpen, fetchLists }) {
-  const [email, setEmail] = useState('');
+  const [inputEmail, setInputEmail] = useState('');
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-
+  const { email } = useAuth();
   const onSubmit = async (e) => {
     e.preventDefault();
     setIsButtonDisabled(true);
@@ -19,13 +20,13 @@ function DeleteModal({ list, isOpen, setIsModalOpen, fetchLists }) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ email: email, id: list['id'] })
+      body: JSON.stringify({ email: inputEmail, id: list['id'] })
     });
     if (resp.status === 200) {
       toast.success(`List deleted`);
       setIsButtonDisabled(false);
       setIsModalOpen(false);
-      fetchLists();
+      fetchLists(email);
     } else {
       setIsButtonDisabled(false);
       toast.error(`Something went wrong: ${(await resp.json())['message']}`);
@@ -46,8 +47,8 @@ function DeleteModal({ list, isOpen, setIsModalOpen, fetchLists }) {
               <Form.Control
                 type="email"
                 placeholder="Enter Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={inputEmail}
+                onChange={(e) => setInputEmail(e.target.value)}
                 required
               />
             </Form.Group>

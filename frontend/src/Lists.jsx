@@ -6,59 +6,38 @@ import Card from 'react-bootstrap/Card';
 import dayjs from 'dayjs';
 import { API_BASE } from './utils';
 import { useAuth } from './AuthProvider';
+import ListItem from './ListItem';
 
 function Lists({ lists, handleEdit, handleDelete }) {
-  const { user } = useAuth();
+  const { email } = useAuth();
+  const getKeys = () => {
+    if (email && lists['authedLists'].length) {
+      return ['authedLists', 'unauthedLists'];
+    }
+    return ['unauthedLists'];
+  };
+
   return (
     <Container fluid className="mt-3">
       <Row>
         <Col md={{ span: 4, offset: 4 }}>
-          {lists.map((list) => {
+          {getKeys().map((key) => {
             return (
-              <Card key={list['name']} className="mt-2">
-                <Card.Body>
-                  <Card.Title>{list['name']}</Card.Title>
-                  <Card.Subtitle className="mb-2 text-muted">
-                    <a
-                      href={`https://calendar.google.com/calendar/r?cid=webcal://${API_BASE.replace(
-                        /^https?\:\/\//i,
-                        ''
-                      )}/cal/${list['id']}`}
-                      className="text-reset text-decoration-none"
-                    >
-                      🗓️ Add to Google Calendar
-                    </a>
-                  </Card.Subtitle>
-                  <Card.Text>
-                    {JSON.parse(list['shows'])
-                      .map((item) => item['label'])
-                      .join(', ')}
-                  </Card.Text>
-                </Card.Body>
-                <Card.Footer>
-                  <small className="text-muted">
-                    Updated {dayjs(list['updatedAt']).format('MMMM D, YYYY')} -{' '}
-                    <a
-                      href="#"
-                      role="button"
-                      className="text-reset text-decoration-none"
-                      onClick={(e) => handleEdit(e, list)}
-                    >
-                      [edit
-                    </a>
-                    &nbsp;|&nbsp;
-                    <a
-                      href="#"
-                      role="button"
-                      className="text-reset text-decoration-none"
-                      onClick={(e) => handleDelete(e, list)}
-                    >
-                      delete
-                    </a>
-                    ]
-                  </small>
-                </Card.Footer>
-              </Card>
+              <span key={key}>
+                {' '}
+                <div className={key === 'unauthedLists' ? 'mt-3' : undefined}>
+                  <h1 className="h4">{key === 'authedLists' ? 'yours' : 'community lists'}</h1>
+                </div>
+                {lists[key].map((listItem) => (
+                  <ListItem
+                    key={listItem['id']}
+                    handleDelete={handleDelete}
+                    handleEdit={handleEdit}
+                    listItem={listItem}
+                    authed={key === 'authedLists'}
+                  />
+                ))}
+              </span>
             );
           })}
         </Col>
