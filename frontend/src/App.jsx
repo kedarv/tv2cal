@@ -4,23 +4,32 @@ import ListForm from './ListForm';
 import Lists from './Lists';
 import EditModal from './EditModal';
 import DeleteModal from './DeleteModal';
+import LoginForm from './LoginForm';
 import { API_BASE } from './utils';
 import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import { useAuth } from './AuthProvider';
 
 function App() {
-  const [lists, setLists] = useState([]);
+  const { email } = useAuth();
+  const [lists, setLists] = useState({
+    unauthedLists: [],
+    authedLists: []
+  });
   const [managingList, setManagingList] = useState({});
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const fetchLists = async () => {
-    const resp = await (await fetch(`${API_BASE}/lists`)).json();
+  const fetchLists = async (email) => {
+    console.log(email);
+    const resp = await (await fetch(`${API_BASE}/lists?email=${encodeURIComponent(email)}`)).json();
     setLists(resp);
   };
 
   useEffect(() => {
-    fetchLists();
-  }, []);
+    fetchLists(email);
+  }, [email]);
 
   const handleEdit = (e, list) => {
     e.preventDefault();
@@ -48,7 +57,16 @@ function App() {
         list={managingList}
         fetchLists={fetchLists}
       />
-      <ListForm fetchLists={fetchLists} standaloneForm={false} />
+      <Container fluid className="mt-3">
+        <Row>
+          <Col md={{ span: 4, offset: 4 }}>
+            <h1 className="h4">
+              tv2cal&nbsp;<small className="text-muted">track your shows in your calendar</small>
+            </h1>
+          </Col>
+        </Row>
+      </Container>
+      {email ? <ListForm fetchLists={fetchLists} standaloneForm={false} /> : <LoginForm />}
       <Lists lists={lists} handleEdit={handleEdit} handleDelete={handleDelete} />
     </Container>
   );

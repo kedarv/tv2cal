@@ -11,6 +11,7 @@ import Card from 'react-bootstrap/Card';
 import dayjs from 'dayjs';
 import { API_BASE } from './utils';
 import toast, { Toaster } from 'react-hot-toast';
+import { useAuth } from './AuthProvider';
 
 async function makeAndHandleRequest(query) {
   const resp = await (await fetch(`${API_BASE}/search?search=${query}`)).json();
@@ -21,13 +22,13 @@ async function makeAndHandleRequest(query) {
 }
 
 function ListForm({ list, fetchLists, standaloneForm }) {
+  const { email } = useAuth();
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState([]);
   const [selected, setSelected] = useState((list && JSON.parse(list.shows)) || []);
   const [query, setQuery] = useState('');
   const [value, setValue] = useState(list?.name || '');
-  const [email, setEmail] = useState('');
   const typeaheadRef = useRef();
 
   const onSubmit = async (e) => {
@@ -57,8 +58,7 @@ function ListForm({ list, fetchLists, standaloneForm }) {
       setSelected([]);
       typeaheadRef.current?.clear();
       toast.success(list ? 'List Updated' : 'List Created');
-      fetchLists();
-      setEmail('');
+      fetchLists(email);
       setIsButtonDisabled(false);
     } else {
       setIsButtonDisabled(false);
@@ -93,22 +93,7 @@ function ListForm({ list, fetchLists, standaloneForm }) {
           required
         />
       </Form.Group>
-      <Form.Group className="mb-3" controlId="formEmail">
-        <Form.Label>{list ? 'Verify Email' : 'Email'}</Form.Label>
-        <Form.Control
-          type="email"
-          placeholder="Enter Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        {!list && (
-          <Form.Text className="text-muted">
-            You'll need to remember this to edit your list in the future
-          </Form.Text>
-        )}
-      </Form.Group>
-      <Form.Group className="mb-3" controlId="formEmail">
+      <Form.Group className="mb-3" controlId="async-search">
         <AsyncTypeahead
           id="async-search"
           isLoading={isLoading}
@@ -129,10 +114,10 @@ function ListForm({ list, fetchLists, standaloneForm }) {
           ref={typeaheadRef}
         />
         <Form.Text className="text-muted">
-          Click the search result or use enter key to add result to your list
+          Click the search result or use enter key to add results
         </Form.Text>
       </Form.Group>
-      <Button variant="primary" type="submit" className="mt-3" disabled={isButtonDisabled}>
+      <Button variant="primary" type="submit" className="mt-1" disabled={isButtonDisabled}>
         {isButtonDisabled ? 'Working...' : 'Submit List'}
       </Button>
     </Form>
@@ -144,12 +129,9 @@ function ListForm({ list, fetchLists, standaloneForm }) {
       {standaloneForm ? (
         innerForm
       ) : (
-        <Container fluid className="mt-3">
+        <Container fluid>
           <Row>
             <Col md={{ span: 4, offset: 4 }}>
-              <h1 className="h4">
-                tv2cal&nbsp;<small className="text-muted">track your shows in your calendar</small>
-              </h1>
               <Card>
                 <Card.Body>{innerForm}</Card.Body>
               </Card>
