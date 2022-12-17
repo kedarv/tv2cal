@@ -111,9 +111,20 @@ const fetchShows = async (shows) => {
       });
       created = true;
     }
-
-    if (created || getUnixTimestamp() > queriedShow["updated_at"] + 21600) {
-      for (let i = 1; i <= queriedShow["seasons"]; i++) {
+    const cacheBusted = getUnixTimestamp() > queriedShow["updated_at"] + 21600;
+    if (created || cacheBusted) {
+      let seasons = queriedShow["seasons"];
+      if (cacheBusted) {
+        const res = await axios.get(`${BASE_URL}/tv/${show["id"]}`, {
+          params: { api_key: fastify.config.API_KEY },
+        });
+        if (queriedShow["seasons"] != res.data["number_of_seasons"]) {
+          queriedShow["seasons"] = res.data["number_of_seasons"];
+          queriedShow.save();
+          seasons = res.data["number_of_seasons"];
+        }
+      }
+      for (let i = 1; i <= seasons; i++) {
         const seasonRes = await axios.get(
           `https://api.themoviedb.org/3/tv/${queriedShow["show_id"]}/season/${i}`,
           { params: { api_key: fastify.config.API_KEY } }
@@ -182,25 +193,25 @@ fastify.get("/cal/:id", async (request, reply) => {
 
 fastify.get("/lists", async (request, reply) => {
   const email = request?.query?.email;
-  if(email) {
+  if (email) {
     return {
-      "unauthedLists": await List.findAll({
+      unauthedLists: await List.findAll({
         where: {
           email: {
             [Op.ne]: email,
-          }
-        }
+          },
+        },
       }),
-      "authedLists": await List.findAll({
+      authedLists: await List.findAll({
         where: {
           email: email,
-        }
+        },
       }),
-    }
+    };
   }
   return {
-    "unauthedLists": await List.findAll(),
-    "authedLists": []
+    unauthedLists: await List.findAll(),
+    authedLists: [],
   };
 });
 
