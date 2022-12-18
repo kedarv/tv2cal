@@ -115,21 +115,23 @@ const fetchShows = async (shows) => {
         zone: "America/Los_Angeles",
       }
     ).plus({ hours: 6 });
-    const cacheBusted = DateTime.now() > showUpdatedAtWithCacheTime;
-
+    const cacheBusted =
+      DateTime.now({ zone: "America/Los_Angeles" }) >
+      showUpdatedAtWithCacheTime;
     if (created || cacheBusted) {
       let seasons = queriedShow["seasons"];
-      queriedShow.set("updatedAt", new Date());
+      queriedShow.changed("updatedAt", true);
+
       if (cacheBusted) {
         const res = await axios.get(`${BASE_URL}/tv/${show["id"]}`, {
           params: { api_key: fastify.config.API_KEY },
         });
         if (queriedShow["seasons"] != res.data["number_of_seasons"]) {
           queriedShow["seasons"] = res.data["number_of_seasons"];
-          queriedShow.save();
           seasons = res.data["number_of_seasons"];
         }
       }
+      queriedShow.save({ silent: false });
       for (let i = 1; i <= seasons; i++) {
         const seasonRes = await axios.get(
           `https://api.themoviedb.org/3/tv/${queriedShow["show_id"]}/season/${i}`,
@@ -146,6 +148,12 @@ const fetchShows = async (shows) => {
               air_date: episode["air_date"],
               episode_id: episode["id"],
             });
+          } else {
+            // TODO: find a more elegant way to create or update
+            foundEpisode["air_date"] = episode["air_date"];
+            // luckily, sequelize will transparently do nothing if there
+            // is nothing to save
+            foundEpisode.save();
           }
         }
       }
