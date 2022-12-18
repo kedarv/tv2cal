@@ -2,9 +2,7 @@ import React from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Card from 'react-bootstrap/Card';
-import dayjs from 'dayjs';
-import { API_BASE } from './utils';
+import Dashboard from './Dashboard';
 import { useAuth } from './AuthProvider';
 import ListItem from './ListItem';
 
@@ -16,11 +14,17 @@ function Lists({ lists, handleEdit, handleDelete }) {
     }
     return ['unauthedLists'];
   };
-
+  const offset = email ? 0 : 4;
   return (
     <Container fluid className="mt-3">
       <Row>
-        <Col md={{ span: 4, offset: 4 }}>
+      {email && lists?.authedLists && lists.authedLists.length ? (
+          <Col md={{ span: 8 }}>
+            <h1 className="h4">dashboard</h1>
+            <Dashboard lists={lists.authedLists}/>
+          </Col>
+        ) : <div>loading</div>}
+        <Col md={{ span: 4, offset }}>
           {getKeys().map((key) => {
             return (
               <span key={key}>

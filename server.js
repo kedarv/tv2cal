@@ -10,7 +10,7 @@ import {
   searchSchema,
   listUpdateSchema,
 } from "./schema.js";
-import { getUnixTimestamp, validateEmail, BASE_URL } from "./utils.js";
+import { validateEmail, BASE_URL } from "./utils.js";
 import { DateTime } from "luxon";
 
 const options = {
@@ -161,15 +161,16 @@ const fetchShows = async (shows) => {
   }
 };
 
-fastify.get("/cal/:id", async (request, reply) => {
-  const { id } = request.params;
+const getEpisodesByList = async (id, update) => {
   const queryRes = await List.findOne({
     where: {
       id: id,
     },
   });
   const shows = JSON.parse(queryRes["shows"]);
-  await fetchShows(shows);
+  if (update) {
+    await fetchShows(shows);
+  }
   const events = await Episode.findAll({
     where: {
       show_id: {
@@ -177,7 +178,12 @@ fastify.get("/cal/:id", async (request, reply) => {
       },
     },
   });
+  return { events, shows, listName: queryRes["name"] };
+};
 
+fastify.get("/cal/:id", async (request, reply) => {
+  const { id } = request.params;
+  const { events, shows, listName } = await getEpisodesByList(id, true);
   const allShows = await Show.findAll({
     where: {
       show_id: {
@@ -186,7 +192,7 @@ fastify.get("/cal/:id", async (request, reply) => {
     },
     raw: true,
   });
-  const calendar = ical({ name: queryRes["name"] });
+  const calendar = ical({ name: listName });
   events
     .filter((event) => event.air_date)
     .map((event) => {
@@ -265,6 +271,12 @@ fastify.post("/delete", listDeleteSchema, async (request, reply) => {
   await validateEmail(list, request.body.email);
   await list.destroy();
   reply.code(200);
+});
+
+fastify.get("/list/:id", async (request, reply) => {
+  const { id } = request.params;
+  const { events } = await getEpisodesByList(id, false);
+  reply.send(events.filter((event) => event.air_date));
 });
 
 await fastify.listen({ port: fastify.config.PORT, host: "0.0.0.0" });

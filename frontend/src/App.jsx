@@ -22,7 +22,6 @@ function App() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchLists = async (email) => {
-    console.log(email);
     const resp = await (await fetch(`${API_BASE}/lists?email=${encodeURIComponent(email)}`)).json();
     setLists(resp);
   };
@@ -66,7 +65,10 @@ function App() {
           </Col>
         </Row>
       </Container>
-      {email ? <ListForm fetchLists={fetchLists} standaloneForm={false} /> : <LoginForm />}
+      {!email && <LoginForm />}
+      {email && !lists['authedLists'] && (
+        <ListForm fetchLists={fetchLists} standaloneForm={false} />
+      )}
       <Lists lists={lists} handleEdit={handleEdit} handleDelete={handleDelete} />
     </Container>
   );
