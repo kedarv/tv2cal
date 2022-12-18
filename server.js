@@ -3,7 +3,6 @@ import cors from "@fastify/cors";
 import axios from "axios";
 import { Sequelize, DataTypes, Op } from "sequelize";
 import ical from "ical-generator";
-import { DateTime } from "luxon";
 import fastifyEnv from "@fastify/env";
 import {
   listCreateSchema,
@@ -12,6 +11,7 @@ import {
   listUpdateSchema,
 } from "./schema.js";
 import { getUnixTimestamp, validateEmail, BASE_URL } from "./utils.js";
+import { DateTime } from "luxon";
 
 const options = {
   confKey: "config",
@@ -77,7 +77,6 @@ const Show = sequelize.define("Show", {
   name: DataTypes.STRING,
   seasons: DataTypes.TEXT,
   show_id: { type: Sequelize.INTEGER, primaryKey: true },
-  updated_at: DataTypes.INTEGER,
 });
 
 const Episode = sequelize.define("Episode", {
@@ -107,13 +106,20 @@ const fetchShows = async (shows) => {
         name: res.data["name"],
         seasons: res.data["number_of_seasons"],
         show_id: show["id"],
-        updated_at: getUnixTimestamp(),
       });
       created = true;
     }
-    const cacheBusted = getUnixTimestamp() > queriedShow["updated_at"] + 21600;
+    const showUpdatedAtWithCacheTime = DateTime.fromJSDate(
+      queriedShow["updatedAt"],
+      {
+        zone: "America/Los_Angeles",
+      }
+    ).plus({ hours: 6 });
+    const cacheBusted = DateTime.now() > showUpdatedAtWithCacheTime;
+
     if (created || cacheBusted) {
       let seasons = queriedShow["seasons"];
+      queriedShow.set("updatedAt", new Date());
       if (cacheBusted) {
         const res = await axios.get(`${BASE_URL}/tv/${show["id"]}`, {
           params: { api_key: fastify.config.API_KEY },
