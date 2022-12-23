@@ -28,6 +28,19 @@ function Dashboard({ lists }) {
     setWatched(accumulatedWatched);
   };
 
+  const episodesByShow = (showId) => {
+    return episodes.filter((episode) => episode.show_id == showId);
+  };
+
+  const watchedEpisodesByShow = (showId) => {
+    const eps = episodesByShow(showId);
+    return watched.filter((episode) => episode.showId == eps.show_id);
+  };
+
+  const unwatchedCountByShow = (showId) => {
+    return episodesByShow(showId).length - watchedEpisodesByShow(showId).length;
+  };
+
   useEffect(() => {
     fetchLists();
   }, []);
@@ -55,68 +68,71 @@ function Dashboard({ lists }) {
         <Card.Title>Watch List</Card.Title>
         <Accordion>
           {lists.map((list) => {
-            return JSON.parse(list['shows']).map((show) => {
-              const episodesForShow = episodes.filter((episode) => episode.show_id == show['id']);
-              const watchedEpisodesForShow = watched.filter(
-                (episode) => episode.showId == episode.show_id
-              );
-              const unwatchedCount = episodesForShow.length - watchedEpisodesForShow.length;
-              return (
-                <Accordion.Item eventKey={show['id']} key={show['show_id']}>
-                  <Accordion.Header>
-                    <Container style={{ paddingLeft: 0 }} key={`container-${show['show_id']}`}>
-                      <Row>
-                        <Col>{show['label']}</Col>
-                        {unwatchedCount > 0 && (
-                          <Col align="end">
-                            <Badge bg="light" text={'dark'}>
-                              {unwatchedCount} episodes
-                            </Badge>
-                          </Col>
-                        )}
-                      </Row>
-                    </Container>
-                  </Accordion.Header>
-                  <Accordion.Body>
-                    <ListGroup>
-                      {episodesForShow
-                        .sort(
-                          (episodeA, episodeB) =>
-                            episodeA.season_number - episodeB.season_number ||
-                            episodeA.episode_number - episodeB.episode_number
-                        )
-                        .map((e) => (
-                          <React.Fragment key={`wrapper-${e.episode_id}`}>
-                            <ListGroup.Item
-                              as="li"
-                              className="d-flex justify-content-between align-items-start"
-                            >
-                              <Form.Check
-                                type="checkbox"
-                                checked={
-                                  watched.filter((episode) => episode.episodeId == e.episode_id)
-                                    .length
-                                }
-                                id={`check-${e.episode_id}`}
-                                label={
-                                  <div className="ms-2 me-auto">
-                                    <div className="fw-bold">
-                                      {' '}
-                                      s{e.season_number}e{e.episode_number}
+            return JSON.parse(list['shows'])
+              .sort(
+                (showA, showB) =>
+                  unwatchedCountByShow(showB['id']) - unwatchedCountByShow(showA['id'])
+              )
+              .map((show) => {
+                const episodesForShow = episodesByShow(show['id']);
+                const watchedEpisodesForShow = watchedEpisodesByShow(show['id']);
+                const unwatchedCount = episodesForShow.length - watchedEpisodesForShow.length;
+                return (
+                  <Accordion.Item eventKey={show['id']} key={show['show_id']}>
+                    <Accordion.Header>
+                      <Container style={{ paddingLeft: 0 }} key={`container-${show['show_id']}`}>
+                        <Row>
+                          <Col>{show['label']}</Col>
+                          {unwatchedCount > 0 && (
+                            <Col align="end">
+                              <Badge bg="light" text={'dark'}>
+                                {unwatchedCount} episodes
+                              </Badge>
+                            </Col>
+                          )}
+                        </Row>
+                      </Container>
+                    </Accordion.Header>
+                    <Accordion.Body>
+                      <ListGroup>
+                        {episodesForShow
+                          .sort(
+                            (episodeA, episodeB) =>
+                              episodeA.season_number - episodeB.season_number ||
+                              episodeA.episode_number - episodeB.episode_number
+                          )
+                          .map((e) => (
+                            <React.Fragment key={`wrapper-${e.episode_id}`}>
+                              <ListGroup.Item
+                                as="li"
+                                className="d-flex justify-content-between align-items-start"
+                              >
+                                <Form.Check
+                                  type="checkbox"
+                                  checked={
+                                    watched.filter((episode) => episode.episodeId == e.episode_id)
+                                      .length
+                                  }
+                                  id={`check-${e.episode_id}`}
+                                  label={
+                                    <div className="ms-2 me-auto">
+                                      <div className="fw-bold">
+                                        {' '}
+                                        s{e.season_number}e{e.episode_number}
+                                      </div>
+                                      {e.name}
                                     </div>
-                                    {e.name}
-                                  </div>
-                                }
-                                onChange={() => onCheckboxChange(list.id, e.episode_id)}
-                              />
-                            </ListGroup.Item>
-                          </React.Fragment>
-                        ))}
-                    </ListGroup>
-                  </Accordion.Body>
-                </Accordion.Item>
-              );
-            });
+                                  }
+                                  onChange={() => onCheckboxChange(list.id, e.episode_id)}
+                                />
+                              </ListGroup.Item>
+                            </React.Fragment>
+                          ))}
+                      </ListGroup>
+                    </Accordion.Body>
+                  </Accordion.Item>
+                );
+              });
           })}
         </Accordion>
       </Card.Body>
