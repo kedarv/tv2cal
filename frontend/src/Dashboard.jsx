@@ -82,7 +82,7 @@ function Dashboard({ lists }) {
                     <Accordion.Header>
                       <Container style={{ paddingLeft: 0 }} key={`container-${show['show_id']}`}>
                         <Row>
-                          <Col>{show['label']}</Col>
+                          <Col md={9}>{show['label']}</Col>
                           {unwatchedCount > 0 && (
                             <Col align="end">
                               <Badge bg="light" text={'dark'}>
