@@ -95,4 +95,31 @@ const listUpdateSchema = {
   },
 };
 
-export { listCreateSchema, listUpdateSchema, listDeleteSchema, searchSchema };
+const markAsWatchedSchema = {
+  schema: {
+    body: {
+      type: "object",
+      required: ["episodeId", "listId", "email"],
+      properties: {
+        email: {
+          type: "string",
+          minLength: 1,
+        },
+        episodeId: {
+          type: "integer",
+        },
+        listId: {
+          type: "string",
+        },
+      },
+    },
+  },
+};
+
+export {
+  listCreateSchema,
+  listUpdateSchema,
+  listDeleteSchema,
+  searchSchema,
+  markAsWatchedSchema,
+};
