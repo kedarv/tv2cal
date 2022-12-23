@@ -33,8 +33,8 @@ function Dashboard({ lists }) {
   };
 
   const watchedEpisodesByShow = (showId) => {
-    const eps = episodesByShow(showId);
-    return watched.filter((episode) => episode.showId == eps.show_id);
+    const episodesIdsForShow = episodesByShow(showId).map((e) => e.episode_id);
+    return watched.filter((e) => episodesIdsForShow.includes(e.episodeId));
   };
 
   const unwatchedCountByShow = (showId) => {
@@ -76,6 +76,7 @@ function Dashboard({ lists }) {
               .map((show) => {
                 const episodesForShow = episodesByShow(show['id']);
                 const watchedEpisodesForShow = watchedEpisodesByShow(show['id']);
+                console.log(watchedEpisodesForShow);
                 const unwatchedCount = episodesForShow.length - watchedEpisodesForShow.length;
                 return (
                   <Accordion.Item eventKey={show['id']} key={show['show_id']}>
