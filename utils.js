@@ -1,7 +1,3 @@
-const getUnixTimestamp = () => {
-  return Math.floor(new Date().getTime() / 1000);
-};
-
 const validateEmail = async (list, email) => {
   if (list.email !== email) {
     const err = new Error();
@@ -13,4 +9,4 @@ const validateEmail = async (list, email) => {
 
 const BASE_URL = "https://api.themoviedb.org/3/";
 
-export { getUnixTimestamp, validateEmail, BASE_URL };
+export { validateEmail, BASE_URL };
