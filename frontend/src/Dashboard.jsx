@@ -76,16 +76,15 @@ function Dashboard({ lists }) {
               .map((show) => {
                 const episodesForShow = episodesByShow(show['id']);
                 const watchedEpisodesForShow = watchedEpisodesByShow(show['id']);
-                console.log(watchedEpisodesForShow);
                 const unwatchedCount = episodesForShow.length - watchedEpisodesForShow.length;
                 return (
                   <Accordion.Item eventKey={show['id']} key={show['show_id']}>
                     <Accordion.Header>
                       <Container style={{ paddingLeft: 0 }} key={`container-${show['show_id']}`}>
                         <Row>
-                          <Col md={9}>{show['label']}</Col>
+                          <Col md={10}>{show['label']}</Col>
                           {unwatchedCount > 0 && (
-                            <Col align="end">
+                            <Col>
                               <Badge bg="light" text={'dark'}>
                                 {unwatchedCount} episodes
                               </Badge>
