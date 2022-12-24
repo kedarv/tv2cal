@@ -10,7 +10,7 @@ import { useAuth } from './AuthProvider';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
-  const { user, login } = useAuth();
+  const { login } = useAuth();
   const onSubmit = async (e) => {
     e.preventDefault();
     login(email);

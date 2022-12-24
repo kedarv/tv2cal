@@ -58,7 +58,7 @@ function ListForm({ list, fetchLists, standaloneForm }) {
       setSelected([]);
       typeaheadRef.current?.clear();
       toast.success(list ? 'List Updated' : 'List Created');
-      fetchLists(email);
+      fetchLists();
       setIsButtonDisabled(false);
     } else {
       setIsButtonDisabled(false);

@@ -18,7 +18,6 @@ function Dashboard({ lists }) {
   const [episodes, setEpisodes] = useState([]);
   const [watched, setWatched] = useState(null);
   const [shows, setShows] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   const fetchEpisodes = async () => {
     let accumulatedEpisodes = [];
@@ -64,8 +63,9 @@ function Dashboard({ lists }) {
   };
 
   useEffect(() => {
+    console.log("in use effect")
     fetchEpisodes();
-  }, []);
+  }, [lists]);
 
   useEffect(() => {
     let shows = [];
@@ -78,7 +78,6 @@ function Dashboard({ lists }) {
       });
       setShows(shows);
     }
-    setLoading(false);
   }, [episodes]);
 
   const onCheckboxChange = async (episodeId, event) => {
@@ -126,7 +125,7 @@ function Dashboard({ lists }) {
                   </Accordion.Header>
                   <Accordion.Body>
                     <ListGroup>
-                      {unwatchedCount > 0 && (
+                      {!!unwatchedCount && (
                         <Container style={{ padding: 0 }} className="mb-2">
                           <Button
                             variant="dark"

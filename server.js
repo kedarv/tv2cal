@@ -121,8 +121,11 @@ const WatchedEpisodes = sequelize.define(
     },
   }
 );
-Episode.hasMany(WatchedEpisodes, {foreignKey: "episodeId"});
+
+Episode.hasMany(WatchedEpisodes, { foreignKey: "episodeId" });
+List.hasMany(WatchedEpisodes, { foreignKey: "listId" });
 WatchedEpisodes.belongsTo(Episode, { foreignKey: "episodeId" });
+WatchedEpisodes.belongsTo(List, { foreignKey: "listId" });
 
 sequelize.sync();
 
@@ -215,8 +218,8 @@ const getEpisodesByList = async (id, update) => {
     },
     include: {
       model: WatchedEpisodes,
-      attributes: ['updatedAt'],
-    }
+      attributes: ["updatedAt"],
+    },
   });
   return { events, shows, listName: queryRes["name"] };
 };

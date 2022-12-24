@@ -22,14 +22,14 @@ function App() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const fetchLists = async (email) => {
+  const fetchLists = async () => {
     const resp = await (await fetch(`${API_BASE}/lists?email=${encodeURIComponent(email)}`)).json();
     setLists(resp);
   };
 
   useEffect(() => {
-    fetchLists(email);
-  }, [email]);
+    fetchLists();
+  }, []);
 
   const handleEdit = (e, list) => {
     e.preventDefault();
@@ -69,7 +69,7 @@ function App() {
           </Row>
         </Container>
         {!email && <LoginForm />}
-        {email && !lists['authedLists'] && (
+        {email && lists.authedLists.length == 0 && (
           <ListForm fetchLists={fetchLists} standaloneForm={false} />
         )}
         <Lists lists={lists} handleEdit={handleEdit} handleDelete={handleDelete} />

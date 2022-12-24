@@ -8,22 +8,24 @@ import ListItem from './ListItem';
 
 function Lists({ lists, handleEdit, handleDelete }) {
   const { email } = useAuth();
+  const ownsList = email && !!lists.authedLists.length;
   const getKeys = () => {
-    if (email && lists['authedLists'].length) {
+    if (ownsList) {
       return ['authedLists', 'unauthedLists'];
     }
     return ['unauthedLists'];
   };
-  const offset = email ? 0 : 4;
+
+  const offset = ownsList ? 0 : 4;
   return (
     <Container fluid className="mt-3">
       <Row>
-      {email && lists?.authedLists && lists.authedLists.length ? (
+        {email && ownsList && (
           <Col md={{ span: 8 }}>
             <h1 className="h4">watch list</h1>
-            <Dashboard lists={lists.authedLists}/>
+            <Dashboard lists={lists.authedLists} />
           </Col>
-        ) : <div>loading</div>}
+        )}
         <Col md={{ span: 4, offset }}>
           {getKeys().map((key) => {
             return (

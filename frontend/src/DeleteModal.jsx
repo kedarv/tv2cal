@@ -10,7 +10,7 @@ import { useAuth } from './AuthProvider';
 function DeleteModal({ list, isOpen, setIsModalOpen, fetchLists }) {
   const [inputEmail, setInputEmail] = useState('');
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-  const { email } = useAuth();
+  const { email, logout } = useAuth();
   const onSubmit = async (e) => {
     e.preventDefault();
     setIsButtonDisabled(true);
@@ -26,7 +26,8 @@ function DeleteModal({ list, isOpen, setIsModalOpen, fetchLists }) {
       toast.success(`List deleted`);
       setIsButtonDisabled(false);
       setIsModalOpen(false);
-      fetchLists(email);
+      logout();
+      fetchLists();
     } else {
       setIsButtonDisabled(false);
       toast.error(`Something went wrong: ${(await resp.json())['message']}`);
