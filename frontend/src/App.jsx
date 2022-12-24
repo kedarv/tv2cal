@@ -29,7 +29,7 @@ function App() {
 
   useEffect(() => {
     fetchLists();
-  }, []);
+  }, [email]);
 
   const handleEdit = (e, list) => {
     e.preventDefault();
@@ -68,7 +68,7 @@ function App() {
             </Col>
           </Row>
         </Container>
-        {!email && <LoginForm />}
+        {!email && <LoginForm fetchLists={fetchLists} />}
         {email && lists.authedLists.length == 0 && (
           <ListForm fetchLists={fetchLists} standaloneForm={false} />
         )}

@@ -63,7 +63,6 @@ function Dashboard({ lists }) {
   };
 
   useEffect(() => {
-    console.log("in use effect")
     fetchEpisodes();
   }, [lists]);
 

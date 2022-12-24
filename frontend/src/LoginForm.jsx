@@ -5,15 +5,15 @@ import Col from 'react-bootstrap/Col';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import { API_BASE } from './utils';
 import { useAuth } from './AuthProvider';
 
-function LoginForm() {
+function LoginForm({ fetchLists }) {
   const [email, setEmail] = useState('');
   const { login } = useAuth();
   const onSubmit = async (e) => {
     e.preventDefault();
     login(email);
+    fetchLists();
   };
 
   return (
