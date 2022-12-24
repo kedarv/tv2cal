@@ -20,7 +20,7 @@ function Lists({ lists, handleEdit, handleDelete }) {
       <Row>
       {email && lists?.authedLists && lists.authedLists.length ? (
           <Col md={{ span: 8 }}>
-            <h1 className="h4">dashboard</h1>
+            <h1 className="h4">watch list</h1>
             <Dashboard lists={lists.authedLists}/>
           </Col>
         ) : <div>loading</div>}
