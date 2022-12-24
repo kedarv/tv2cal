@@ -139,7 +139,11 @@ function Dashboard({ lists }) {
                       )}
                       {episodesForShow
                         .sort(
-                          (episodeA, episodeB) =>
+                          (
+                            episodeA,
+                            episodeB // Sort by watched status, season, then episode
+                          ) =>
+                            episodeA.WatchedEpisodes.length - episodeB.WatchedEpisodes.length ||
                             episodeA.season_number - episodeB.season_number ||
                             episodeA.episode_number - episodeB.episode_number
                         )
