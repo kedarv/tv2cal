@@ -10,6 +10,7 @@ import {
   searchSchema,
   listUpdateSchema,
   markAsWatchedSchema,
+  markAllAsWatchedSchema,
 } from "./schema.js";
 import { validateEmail, BASE_URL } from "./utils.js";
 import { DateTime } from "luxon";
@@ -120,6 +121,7 @@ const WatchedEpisodes = sequelize.define(
     },
   }
 );
+WatchedEpisodes.belongsTo(Episode, { foreignKey: "episodeId" });
 
 sequelize.sync();
 
@@ -310,7 +312,7 @@ fastify.get("/list/:id", async (request, reply) => {
   const { id } = request.params;
   const { events } = await getEpisodesByList(id, false);
   const watched = await WatchedEpisodes.findAll({
-    listId: id,
+    where: { listId: id },
   });
   reply.send({
     events: events.filter((event) => event.air_date),
@@ -319,16 +321,16 @@ fastify.get("/list/:id", async (request, reply) => {
 });
 
 fastify.post("/markAsWatched", markAsWatchedSchema, async (request, reply) => {
-  const listId = request.body.listId;
   const list = await List.unscoped().findOne({
-    where: { id: listId },
+    where: { email: request.body.email },
   });
-  await validateEmail(list, request.body.email);
+  const listId = list.id;
+
   const existingRecord = await WatchedEpisodes.unscoped().findOne({
     where: { listId: listId, episodeId: request.body.episodeId },
   });
   if (existingRecord) {
-    await existingRecord.destroy({force: true});
+    await existingRecord.destroy({ force: true });
   } else {
     await WatchedEpisodes.create({
       episodeId: request.body.episodeId,
@@ -341,5 +343,33 @@ fastify.post("/markAsWatched", markAsWatchedSchema, async (request, reply) => {
     })
   );
 });
+
+fastify.post(
+  "/markAllAsWatched",
+  markAllAsWatchedSchema,
+  async (request, reply) => {
+    const list = await List.unscoped().findOne({
+      where: { email: request.body.email },
+    });
+    const listId = list.id;
+
+    const existingRecord = await WatchedEpisodes.unscoped().findOne({
+      where: { listId: listId, episodeId: request.body.episodeId },
+    });
+    if (existingRecord) {
+      await existingRecord.destroy({ force: true });
+    } else {
+      await WatchedEpisodes.create({
+        episodeId: request.body.episodeId,
+        listId: listId,
+      });
+    }
+    reply.send(
+      await WatchedEpisodes.findAll({
+        where: { listId: listId },
+      })
+    );
+  }
+);
 
 await fastify.listen({ port: fastify.config.PORT, host: "0.0.0.0" });

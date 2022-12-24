@@ -99,7 +99,7 @@ const markAsWatchedSchema = {
   schema: {
     body: {
       type: "object",
-      required: ["episodeId", "listId", "email"],
+      required: ["episodeId", "email"],
       properties: {
         email: {
           type: "string",
@@ -108,8 +108,23 @@ const markAsWatchedSchema = {
         episodeId: {
           type: "integer",
         },
-        listId: {
+      },
+    },
+  },
+};
+
+const markAllAsWatchedSchema = {
+  schema: {
+    body: {
+      type: "object",
+      required: ["showId", "email"],
+      properties: {
+        showId: {
           type: "string",
+        },
+        email: {
+          type: "string",
+          minLength: 1,
         },
       },
     },
@@ -122,4 +137,5 @@ export {
   listDeleteSchema,
   searchSchema,
   markAsWatchedSchema,
+  markAllAsWatchedSchema,
 };
