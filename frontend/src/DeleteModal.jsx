@@ -4,7 +4,7 @@ import fetch from 'isomorphic-fetch';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { API_BASE } from './utils';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { useAuth } from './AuthProvider';
 
 function DeleteModal({ list, isOpen, setIsModalOpen, fetchLists }) {
@@ -35,7 +35,6 @@ function DeleteModal({ list, isOpen, setIsModalOpen, fetchLists }) {
 
   return (
     <>
-      <Toaster />
       <Modal show={isOpen} onHide={() => setIsModalOpen(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Delete List</Modal.Title>

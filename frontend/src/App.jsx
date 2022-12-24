@@ -10,6 +10,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { useAuth } from './AuthProvider';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const { email } = useAuth();
@@ -43,34 +44,37 @@ function App() {
   };
 
   return (
-    <Container className="mb-3">
-      <EditModal
-        isOpen={isEditModalOpen}
-        setIsModalOpen={setIsEditModalOpen}
-        list={managingList}
-        fetchLists={fetchLists}
-      />
-      <DeleteModal
-        isOpen={isDeleteModalOpen}
-        setIsModalOpen={setIsDeleteModalOpen}
-        list={managingList}
-        fetchLists={fetchLists}
-      />
-      <Container fluid className="mt-3">
-        <Row>
-          <Col md={{ span: 4, offset: 4 }}>
-            <h1 className="h4">
-              tv2cal&nbsp;<small className="text-muted">track your shows in your calendar</small>
-            </h1>
-          </Col>
-        </Row>
+    <>
+      <Toaster position="top-right" />
+      <Container className="mb-3">
+        <EditModal
+          isOpen={isEditModalOpen}
+          setIsModalOpen={setIsEditModalOpen}
+          list={managingList}
+          fetchLists={fetchLists}
+        />
+        <DeleteModal
+          isOpen={isDeleteModalOpen}
+          setIsModalOpen={setIsDeleteModalOpen}
+          list={managingList}
+          fetchLists={fetchLists}
+        />
+        <Container fluid className="mt-3">
+          <Row>
+            <Col md={{ span: 4, offset: 4 }}>
+              <h1 className="h4">
+                tv2cal&nbsp;<small className="text-muted">track your shows in your calendar</small>
+              </h1>
+            </Col>
+          </Row>
+        </Container>
+        {!email && <LoginForm />}
+        {email && !lists['authedLists'] && (
+          <ListForm fetchLists={fetchLists} standaloneForm={false} />
+        )}
+        <Lists lists={lists} handleEdit={handleEdit} handleDelete={handleDelete} />
       </Container>
-      {!email && <LoginForm />}
-      {email && !lists['authedLists'] && (
-        <ListForm fetchLists={fetchLists} standaloneForm={false} />
-      )}
-      <Lists lists={lists} handleEdit={handleEdit} handleDelete={handleDelete} />
-    </Container>
+    </>
   );
 }
 

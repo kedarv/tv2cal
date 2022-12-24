@@ -352,18 +352,33 @@ fastify.post(
       where: { email: request.body.email },
     });
     const listId = list.id;
+    const shows = JSON.parse(list.shows);
+    if (!shows.find((show) => show.id == request.body.showId)) {
+      reply.code(500);
+    }
 
-    const existingRecord = await WatchedEpisodes.unscoped().findOne({
-      where: { listId: listId, episodeId: request.body.episodeId },
+    const watched = (
+      await WatchedEpisodes.findAll({
+        where: { listId: listId },
+        attributes: ["episodeId"],
+        raw: true,
+      })
+    ).map((e) => e.episodeId);
+
+    const episodes = await Episode.findAll({
+      where: {
+        show_id: request.body.showId,
+        episode_id: { [Op.notIn]: watched },
+      },
     });
-    if (existingRecord) {
-      await existingRecord.destroy({ force: true });
-    } else {
+
+    for (const episode of episodes) {
       await WatchedEpisodes.create({
-        episodeId: request.body.episodeId,
+        episodeId: episode.episode_id,
         listId: listId,
       });
     }
+
     reply.send(
       await WatchedEpisodes.findAll({
         where: { listId: listId },

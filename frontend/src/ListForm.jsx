@@ -10,7 +10,7 @@ import 'react-bootstrap-typeahead/css/Typeahead.css';
 import Card from 'react-bootstrap/Card';
 import dayjs from 'dayjs';
 import { API_BASE } from './utils';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { useAuth } from './AuthProvider';
 
 async function makeAndHandleRequest(query) {
@@ -125,7 +125,6 @@ function ListForm({ list, fetchLists, standaloneForm }) {
 
   return (
     <>
-      <Toaster />
       {standaloneForm ? (
         innerForm
       ) : (
