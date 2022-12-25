@@ -22,7 +22,7 @@ function LoginForm({ fetchLists }) {
         <Col md={{ span: 4, offset: 4 }}>
           <Card>
             <Card.Body>
-              <h5>Authenticate</h5>
+              <h5>Login</h5>
               <Form onSubmit={onSubmit}>
                 <Form.Group className="mb-3" controlId="formEmail">
                   <Form.Label>Email</Form.Label>

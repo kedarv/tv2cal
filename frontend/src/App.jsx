@@ -46,7 +46,7 @@ function App() {
   return (
     <>
       <Toaster position="top-right" />
-      <Container className="mb-3">
+      <Container>
         <EditModal
           isOpen={isEditModalOpen}
           setIsModalOpen={setIsEditModalOpen}
@@ -59,16 +59,21 @@ function App() {
           list={managingList}
           fetchLists={fetchLists}
         />
-        <Container fluid className="mt-3">
-          <Row>
-            <Col md={{ span: 4, offset: 4 }}>
-              <h1 className="h4">
-                tv2cal&nbsp;<small className="text-muted">track your shows in your calendar</small>
-              </h1>
-            </Col>
-          </Row>
-        </Container>
-        {!email && <LoginForm fetchLists={fetchLists} />}
+        {!email && (
+          <>
+            <Container fluid className="mt-3">
+              <Row>
+                <Col md={{ span: 4, offset: 4 }}>
+                  <h1 className="h4">
+                    tv2cal&nbsp;
+                    <small className="text-muted">track your shows in your calendar</small>
+                  </h1>
+                </Col>
+              </Row>
+            </Container>
+            <LoginForm fetchLists={fetchLists} />
+          </>
+        )}
         {email && lists.authedLists.length == 0 && (
           <ListForm fetchLists={fetchLists} standaloneForm={false} />
         )}

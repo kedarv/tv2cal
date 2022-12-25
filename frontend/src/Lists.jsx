@@ -18,21 +18,21 @@ function Lists({ lists, handleEdit, handleDelete }) {
 
   const offset = ownsList ? 0 : 4;
   return (
-    <Container fluid className="mt-3">
+    <Container fluid>
       <Row>
         {email && ownsList && (
-          <Col md={{ span: 8 }}>
-            <h1 className="h4">watch list</h1>
+          <Col md={{ span: 8 }}  className="mt-3">
+            <h1 className="h4">tv2cal{' '}<small className="text-muted">watch list</small></h1>
             <Dashboard lists={lists.authedLists} />
           </Col>
         )}
-        <Col md={{ span: 4, offset }}>
+        <Col md={{ span: 4, offset }} className="mt-3">
           {getKeys().map((key) => {
             return (
               <span key={key}>
                 {' '}
                 <div className={key === 'unauthedLists' ? 'mt-3' : undefined}>
-                  <h1 className="h4">{key === 'authedLists' ? 'yours' : 'community lists'}</h1>
+                  <h1 className="h4">{key === 'authedLists' ? 'your list' : 'community lists'}</h1>
                 </div>
                 {lists[key].map((listItem) => (
                   <ListItem

@@ -19,6 +19,7 @@ function Dashboard({ lists }) {
   const [episodes, setEpisodes] = useState([]);
   const [watched, setWatched] = useState(null);
   const [shows, setShows] = useState([]);
+  const [disabledCheckbox, setDisabledCheckbox] = useState([]);
 
   const fetchEpisodes = async () => {
     let accumulatedEpisodes = [];
@@ -81,20 +82,27 @@ function Dashboard({ lists }) {
   }, [episodes]);
 
   const onCheckboxChange = async (episodeId, event) => {
+    setDisabledCheckbox([...disabledCheckbox, episodeId]);
     let resp;
-    resp = await fetch(`${API_BASE}/markAsWatched`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, episodeId })
-    });
-    if (resp.status === 200) {
-      const updatedWatched = await resp.json();
-      setWatched(updatedWatched);
-      toast.success(`Marked as ${!event.target.checked ? 'watched' : 'unwatched'}`);
-    } else {
-      toast.error(`Something went wrong: ${(await resp.json())['message']}`);
+    try {
+      resp = await fetch(`${API_BASE}/markAsWatched`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, episodeId })
+      });
+      if (resp.status === 200) {
+        const updatedWatched = await resp.json();
+        setWatched(updatedWatched);
+        toast.success(`Marked as ${!event.target.checked ? 'watched' : 'unwatched'}`);
+      } else {
+        toast.error(`Something went wrong: ${(await resp.json())['message']}`);
+      }
+    } catch (err) {
+      toast.error(`Something went wrong: ${err.message}`);
+    } finally {
+      setDisabledCheckbox(disabledCheckbox.filter((item) => item !== episodeId));
     }
   };
 
@@ -114,7 +122,7 @@ function Dashboard({ lists }) {
                       <Row>
                         <Col md={10}>{show['label']}</Col>
                         {unwatchedCount > 0 && (
-                          <Col className='text-justify-lg'>
+                          <Col className="text-justify-lg">
                             <Badge bg="light" text={'dark'}>
                               {unwatchedCount} episode{unwatchedCount > 1 ? 's' : ''}
                             </Badge>
@@ -168,6 +176,7 @@ function Dashboard({ lists }) {
                                   </div>
                                 }
                                 onChange={(event) => onCheckboxChange(episode.episode_id, event)}
+                                disabled={disabledCheckbox.includes(episode.episode_id)}
                               />
                             </ListGroup.Item>
                           </React.Fragment>
