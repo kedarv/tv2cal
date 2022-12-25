@@ -12,6 +12,7 @@ import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import toast from 'react-hot-toast';
 import { useAuth } from './AuthProvider';
+import styles from './Dashboard.css';
 
 function Dashboard({ lists }) {
   const { email } = useAuth();
@@ -113,7 +114,7 @@ function Dashboard({ lists }) {
                       <Row>
                         <Col md={10}>{show['label']}</Col>
                         {unwatchedCount > 0 && (
-                          <Col>
+                          <Col className='text-justify-lg'>
                             <Badge bg="light" text={'dark'}>
                               {unwatchedCount} episode{unwatchedCount > 1 ? 's' : ''}
                             </Badge>
@@ -147,10 +148,7 @@ function Dashboard({ lists }) {
                         )
                         .map((episode) => (
                           <React.Fragment key={`wrapper-${episode.episode_id}`}>
-                            <ListGroup.Item
-                              as="li"
-                              className="d-flex justify-content-between align-items-start"
-                            >
+                            <ListGroup.Item as="li">
                               <Form.Check
                                 type="checkbox"
                                 checked={

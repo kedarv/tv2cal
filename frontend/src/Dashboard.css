@@ -1,0 +1,6 @@
+/* Large devices (large desktops, 1400px and up) */
+@media (min-width: 1400px) {
+    .text-justify-lg {
+        text-align: end;
+    }
+}
