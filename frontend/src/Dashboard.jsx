@@ -115,7 +115,7 @@ function Dashboard({ lists }) {
                         {unwatchedCount > 0 && (
                           <Col>
                             <Badge bg="light" text={'dark'}>
-                              {unwatchedCount} episodes
+                              {unwatchedCount} episode{unwatchedCount > 1 ? 's' : ''}
                             </Badge>
                           </Col>
                         )}
