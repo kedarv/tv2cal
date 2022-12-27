@@ -21,8 +21,10 @@ function Lists({ lists, handleEdit, handleDelete }) {
     <Container fluid>
       <Row>
         {email && ownsList && (
-          <Col md={{ span: 8 }}  className="mt-3">
-            <h1 className="h4">tv2cal{' '}<small className="text-muted">watch list</small></h1>
+          <Col md={{ span: 8 }} className="mt-3">
+            <h1 className="h4">
+              tv2cal <small className="text-muted">watch list</small>
+            </h1>
             <Dashboard lists={lists.authedLists} />
           </Col>
         )}

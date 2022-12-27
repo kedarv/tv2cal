@@ -88,6 +88,21 @@ const Episode = sequelize.define("Episode", {
   show_id: DataTypes.INTEGER,
   air_date: DataTypes.STRING,
   episode_id: { type: Sequelize.INTEGER, primaryKey: true },
+  aired: {
+    type: DataTypes.VIRTUAL,
+    get() {
+      return (
+        !!this.air_date &&
+        DateTime.now() >=
+          DateTime.fromISO(this.air_date, {
+            zone: "America/Los_Angeles",
+          })
+      );
+    },
+    set(value) {
+      throw new Error("not settable");
+    },
+  },
 });
 
 const WatchedEpisodes = sequelize.define(
@@ -177,7 +192,13 @@ const fetchShows = async (shows) => {
           { params: { api_key: fastify.config.API_KEY } }
         );
         for (const episode of seasonRes.data["episodes"]) {
-          const foundEpisode = await Episode.findByPk(episode["id"]);
+          const foundEpisode = await Episode.findOne({
+            where: {
+              show_id: episode["show_id"],
+              episode_number: episode["episode_number"],
+              season_number: episode["season_number"],
+            },
+          });
           if (!foundEpisode) {
             Episode.create({
               name: episode["name"],
@@ -190,6 +211,8 @@ const fetchShows = async (shows) => {
           } else {
             // TODO: find a more elegant way to create or update
             foundEpisode["air_date"] = episode["air_date"];
+            foundEpisode["name"] = episode["name"];
+            foundEpisode["episode_id"] = episode["id"];
             // luckily, sequelize will transparently do nothing if there
             // is nothing to save
             foundEpisode.save();
@@ -334,6 +357,18 @@ fastify.post("/markAsWatched", markAsWatchedSchema, async (request, reply) => {
   });
   const listId = list.id;
 
+  const episode = await Episode.findOne({
+    where: { episode_id: request.body.episodeId },
+  });
+
+  if (!episode) {
+    return reply.code(400).send({ message: "episode does not exist" });
+  } else if (!episode.aired || !episode.air_date) {
+    return reply
+      .code(400)
+      .send({ message: "cannot mark unaired episode as watched" });
+  }
+
   const existingRecord = await WatchedEpisodes.unscoped().findOne({
     where: { listId: listId, episodeId: request.body.episodeId },
   });
@@ -377,14 +412,21 @@ fastify.post(
       where: {
         show_id: request.body.showId,
         episode_id: { [Op.notIn]: watched },
+        air_date: {
+          [Op.ne]: null,
+        },
       },
     });
 
     for (const episode of episodes) {
-      await WatchedEpisodes.create({
-        episodeId: episode.episode_id,
-        listId: listId,
-      });
+      // We can't access virtual fields in the initial query
+      // Check aired property here instead as a workaround
+      if (episode.aired) {
+        await WatchedEpisodes.create({
+          episodeId: episode.episode_id,
+          listId: listId,
+        });
+      }
     }
 
     reply.send(

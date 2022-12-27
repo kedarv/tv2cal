@@ -42,8 +42,17 @@ function Dashboard({ lists }) {
     return watched.filter((e) => episodesIdsForShow.includes(e.episodeId));
   };
 
+  const unairedEpisodesByShow = (showId) => {
+    const episodesIdsForShow = episodesByShow(showId);
+    return episodesIdsForShow.filter((e) => e.aired == false);
+  };
+
   const unwatchedCountByShow = (showId) => {
-    return episodesByShow(showId).length - watchedEpisodesByShow(showId).length;
+    return (
+      episodesByShow(showId).length -
+      watchedEpisodesByShow(showId).length -
+      unairedEpisodesByShow(showId).length
+    );
   };
 
   const handleMarkAllAsWatched = async (showId) => {
@@ -113,8 +122,7 @@ function Dashboard({ lists }) {
           <Accordion>
             {shows.map((show) => {
               const episodesForShow = episodesByShow(show['id']);
-              const watchedEpisodesForShow = watchedEpisodesByShow(show['id']);
-              const unwatchedCount = episodesForShow.length - watchedEpisodesForShow.length;
+              const unwatchedCount = unwatchedCountByShow(show['id']);
               return (
                 <Accordion.Item eventKey={show['id']} key={show['id']}>
                   <Accordion.Header>
@@ -176,7 +184,9 @@ function Dashboard({ lists }) {
                                   </div>
                                 }
                                 onChange={(event) => onCheckboxChange(episode.episode_id, event)}
-                                disabled={disabledCheckbox.includes(episode.episode_id)}
+                                disabled={
+                                  !episode.aired || disabledCheckbox.includes(episode.episode_id)
+                                }
                               />
                             </ListGroup.Item>
                           </React.Fragment>
