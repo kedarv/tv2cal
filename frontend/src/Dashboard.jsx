@@ -39,7 +39,7 @@ function Dashboard({ lists }) {
 
   const watchedEpisodesByShow = (showId) => {
     const episodesIdsForShow = episodesByShow(showId).map((e) => e.episode_id);
-    return watched.filter((e) => episodesIdsForShow.includes(e.episodeId));
+    return watched.filter((e) => episodesIdsForShow.includes(e.episode_id));
   };
 
   const unairedEpisodesByShow = (showId) => {
@@ -170,7 +170,7 @@ function Dashboard({ lists }) {
                                 checked={
                                   watched.filter(
                                     (watchedEpisode) =>
-                                      watchedEpisode.episodeId == episode.episode_id
+                                      watchedEpisode.episode_id == episode.episode_id
                                   ).length
                                 }
                                 id={`check-${episode.episode_id}`}

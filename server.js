@@ -113,7 +113,7 @@ const WatchedEpisodes = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    listId: {
+    list_id: {
       type: Sequelize.UUID,
       references: {
         model: List,
@@ -121,7 +121,7 @@ const WatchedEpisodes = sequelize.define(
       },
       unique: "compositeIndex",
     },
-    episodeId: {
+    episode_id: {
       type: Sequelize.INTEGER,
       references: {
         model: Episode,
@@ -137,10 +137,10 @@ const WatchedEpisodes = sequelize.define(
   }
 );
 
-Episode.hasMany(WatchedEpisodes, { foreignKey: "episodeId" });
-List.hasMany(WatchedEpisodes, { foreignKey: "listId" });
-WatchedEpisodes.belongsTo(Episode, { foreignKey: "episodeId" });
-WatchedEpisodes.belongsTo(List, { foreignKey: "listId" });
+Episode.hasMany(WatchedEpisodes, { foreignKey: "episode_id" });
+List.hasMany(WatchedEpisodes, { foreignKey: "list_id" });
+WatchedEpisodes.belongsTo(Episode, { foreignKey: "episode_id" });
+WatchedEpisodes.belongsTo(List, { foreignKey: "list_id" });
 
 sequelize.sync();
 
@@ -343,7 +343,7 @@ fastify.get("/list/:id", async (request, reply) => {
   const { id } = request.params;
   const { events } = await getEpisodesByList(id, false);
   const watched = await WatchedEpisodes.findAll({
-    where: { listId: id },
+    where: { list_id: id },
   });
   reply.send({
     events: events.filter((event) => event.air_date),
@@ -370,19 +370,19 @@ fastify.post("/markAsWatched", markAsWatchedSchema, async (request, reply) => {
   }
 
   const existingRecord = await WatchedEpisodes.unscoped().findOne({
-    where: { listId: listId, episodeId: request.body.episodeId },
+    where: { list_id: listId, episode_id: request.body.episodeId },
   });
   if (existingRecord) {
     await existingRecord.destroy({ force: true });
   } else {
     await WatchedEpisodes.create({
-      episodeId: request.body.episodeId,
-      listId: listId,
+      episode_id: request.body.episodeId,
+      list_id: listId,
     });
   }
   reply.send(
     await WatchedEpisodes.findAll({
-      where: { listId: listId },
+      where: { list_id: listId },
     })
   );
 });
@@ -402,7 +402,7 @@ fastify.post(
 
     const watched = (
       await WatchedEpisodes.findAll({
-        where: { listId: listId },
+        where: { list_id: listId },
         attributes: ["episodeId"],
         raw: true,
       })
@@ -423,15 +423,15 @@ fastify.post(
       // Check aired property here instead as a workaround
       if (episode.aired) {
         await WatchedEpisodes.create({
-          episodeId: episode.episode_id,
-          listId: listId,
+          episode_id: episode.episode_id,
+          list_id: listId,
         });
       }
     }
 
     reply.send(
       await WatchedEpisodes.findAll({
-        where: { listId: listId },
+        where: { list_id: listId },
       })
     );
   }
