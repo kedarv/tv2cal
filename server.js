@@ -403,10 +403,10 @@ fastify.post(
     const watched = (
       await WatchedEpisodes.findAll({
         where: { list_id: listId },
-        attributes: ["episodeId"],
+        attributes: ["episode_id"],
         raw: true,
       })
-    ).map((e) => e.episodeId);
+    ).map((e) => e.episode_id);
 
     const episodes = await Episode.findAll({
       where: {
