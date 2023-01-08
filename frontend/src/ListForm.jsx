@@ -130,7 +130,7 @@ function ListForm({ list, fetchLists, standaloneForm }) {
       ) : (
         <Container fluid>
           <Row>
-            <Col md={{ span: 4, offset: 4 }}>
+            <Col md={{ span: 4, offset: 4 }} className={"mt-3"}>
               <Card>
                 <Card.Body>{innerForm}</Card.Body>
               </Card>

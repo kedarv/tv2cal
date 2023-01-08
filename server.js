@@ -79,6 +79,7 @@ const Show = sequelize.define("Show", {
   name: DataTypes.STRING,
   seasons: DataTypes.TEXT,
   show_id: { type: Sequelize.INTEGER, primaryKey: true },
+  ended: DataTypes.BOOLEAN,
 });
 
 const Episode = sequelize.define("Episode", {
@@ -151,20 +152,21 @@ fastify.get("/", async (request, reply) => {
 const fetchShows = async (shows) => {
   for (const show of shows) {
     let created = false;
-    let queriedShow = await Show.findOne({ where: { show_id: show["id"] } });
+    let queriedShow = await Show.findOne({ where: { show_id: show.id } });
     if (queriedShow === null) {
-      const res = await axios.get(`${BASE_URL}/tv/${show["id"]}`, {
+      const res = await axios.get(`${BASE_URL}/tv/${show.id}`, {
         params: { api_key: fastify.config.API_KEY },
       });
       queriedShow = await Show.create({
-        name: res.data["name"],
-        seasons: res.data["number_of_seasons"],
-        show_id: show["id"],
+        name: res.data.name,
+        seasons: res.data.number_of_seasons,
+        show_id: show.id,
+        ended: res.data.status === "Ended",
       });
       created = true;
     }
     const showUpdatedAtWithCacheTime = DateTime.fromJSDate(
-      queriedShow["updatedAt"],
+      queriedShow.updatedAt,
       {
         zone: "America/Los_Angeles",
       }
@@ -173,11 +175,11 @@ const fetchShows = async (shows) => {
       DateTime.now({ zone: "America/Los_Angeles" }) >
       showUpdatedAtWithCacheTime;
     if (created || cacheBusted) {
-      let seasons = queriedShow["seasons"];
+      let seasons = queriedShow.seasons;
       queriedShow.changed("updatedAt", true);
 
       if (cacheBusted) {
-        const res = await axios.get(`${BASE_URL}/tv/${show["id"]}`, {
+        const res = await axios.get(`${BASE_URL}/tv/${show.id}`, {
           params: { api_key: fastify.config.API_KEY },
         });
         if (queriedShow["seasons"] != res.data["number_of_seasons"]) {
