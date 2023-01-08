@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../data/database.sqlite"
+}
+
+model Episode {
+  name            String
+  season_number   Int
+  episode_number  Int
+  show_id         Int
+  air_date        String?
+  episode_id      Int              @id @default(autoincrement())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  WatchedEpisodes WatchedEpisode[]
+
+  @@map("Episodes")
+}
+
+model List {
+  id              Int              @id @default(autoincrement())
+  name            String
+  shows           String?
+  email           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  WatchedEpisodes WatchedEpisode[]
+
+  @@unique([name, email], map: "sqlite_autoindex_Lists_1")
+  @@map("Lists")
+}
+
+model Show {
+  name      String
+  seasons   Int
+  show_id   Int      @id
+  ended     Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Shows")
+}
+
+model WatchedEpisode {
+  id         Int      @id @default(autoincrement())
+  list_id    Int
+  episode_id Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  Episodes   Episode? @relation(fields: [episode_id], references: [episode_id], onDelete: Cascade)
+  Lists      List?    @relation(fields: [list_id], references: [id], onDelete: Cascade)
+
+  @@unique([list_id, episode_id], map: "sqlite_autoindex_WatchedEpisodes_1")
+  @@map("WatchedEpisodes")
+}

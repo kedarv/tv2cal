@@ -1,7 +1,6 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import axios from "axios";
-import { Sequelize, DataTypes, Op } from "sequelize";
 import ical from "ical-generator";
 import fastifyEnv from "@fastify/env";
 import {
@@ -14,6 +13,7 @@ import {
 } from "./schema.js";
 import { validateEmail, BASE_URL } from "./utils.js";
 import { DateTime } from "luxon";
+import prisma from "./prisma.js";
 
 const options = {
   confKey: "config",
@@ -43,108 +43,6 @@ await fastify.register(cors);
 fastify.register(fastifyEnv, options);
 await fastify.after();
 
-const sequelize = new Sequelize({
-  dialect: "sqlite",
-  storage: fastify.config.DB_PATH,
-  sync: true,
-  logging: false,
-});
-
-const List = sequelize.define(
-  "List",
-  {
-    id: {
-      type: Sequelize.UUID,
-      defaultValue: Sequelize.UUIDV4,
-      allowNull: false,
-      primaryKey: true,
-    },
-    name: DataTypes.STRING,
-    shows: DataTypes.TEXT,
-    email: DataTypes.STRING,
-  },
-  {
-    uniqueKeys: {
-      Items_unique: {
-        fields: ["name", "email"],
-      },
-    },
-    defaultScope: {
-      attributes: { exclude: ["email"] },
-    },
-  }
-);
-
-const Show = sequelize.define("Show", {
-  name: DataTypes.STRING,
-  seasons: DataTypes.TEXT,
-  show_id: { type: Sequelize.INTEGER, primaryKey: true },
-  ended: DataTypes.BOOLEAN,
-});
-
-const Episode = sequelize.define("Episode", {
-  name: DataTypes.STRING,
-  season_number: DataTypes.INTEGER,
-  episode_number: DataTypes.INTEGER,
-  show_id: DataTypes.INTEGER,
-  air_date: DataTypes.STRING,
-  episode_id: { type: Sequelize.INTEGER, primaryKey: true },
-  aired: {
-    type: DataTypes.VIRTUAL,
-    get() {
-      return (
-        !!this.air_date &&
-        DateTime.now() >=
-          DateTime.fromISO(this.air_date, {
-            zone: "America/Los_Angeles",
-          })
-      );
-    },
-    set(value) {
-      throw new Error("not settable");
-    },
-  },
-});
-
-const WatchedEpisodes = sequelize.define(
-  "WatchedEpisodes",
-  {
-    id: {
-      type: Sequelize.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    list_id: {
-      type: Sequelize.UUID,
-      references: {
-        model: List,
-        key: "id",
-      },
-      unique: "compositeIndex",
-    },
-    episode_id: {
-      type: Sequelize.INTEGER,
-      references: {
-        model: Episode,
-        key: "episode_id",
-      },
-      unique: "compositeIndex",
-    },
-  },
-  {
-    defaultScope: {
-      attributes: { exclude: ["id"] },
-    },
-  }
-);
-
-Episode.hasMany(WatchedEpisodes, { foreignKey: "episode_id" });
-List.hasMany(WatchedEpisodes, { foreignKey: "list_id" });
-WatchedEpisodes.belongsTo(Episode, { foreignKey: "episode_id" });
-WatchedEpisodes.belongsTo(List, { foreignKey: "list_id" });
-
-sequelize.sync();
-
 fastify.get("/", async (request, reply) => {
   return "tv2cal is running";
 });
@@ -152,16 +50,19 @@ fastify.get("/", async (request, reply) => {
 const fetchShows = async (shows) => {
   for (const show of shows) {
     let created = false;
-    let queriedShow = await Show.findOne({ where: { show_id: show.id } });
+    let queriedShow = await prisma.Show.findUnique({ where: { show_id: show.id } });
+    
     if (queriedShow === null) {
       const res = await axios.get(`${BASE_URL}/tv/${show.id}`, {
         params: { api_key: fastify.config.API_KEY },
       });
-      queriedShow = await Show.create({
-        name: res.data.name,
-        seasons: res.data.number_of_seasons,
-        show_id: show.id,
-        ended: res.data.status === "Ended",
+      queriedShow = await prisma.Show.create({
+        data: {
+          name: res.data.name,
+          seasons: res.data.number_of_seasons,
+          show_id: show.id,
+          ended: res.data.status === "Ended",
+        }
       });
       created = true;
     }
@@ -176,49 +77,45 @@ const fetchShows = async (shows) => {
       showUpdatedAtWithCacheTime;
     if (created || cacheBusted) {
       let seasons = queriedShow.seasons;
-      queriedShow.changed("updatedAt", true);
-
       if (cacheBusted) {
         const res = await axios.get(`${BASE_URL}/tv/${show.id}`, {
           params: { api_key: fastify.config.API_KEY },
         });
-        if (queriedShow["seasons"] != res.data["number_of_seasons"]) {
-          queriedShow["seasons"] = res.data["number_of_seasons"];
-          seasons = res.data["number_of_seasons"];
-        }
+        await prisma.user.update({
+          where: { show_id: show.id },
+          data: {
+            seasons: res.data["number_of_seasons"],
+            updatedAt: Date.now()
+          },
+        }); 
       }
-      queriedShow.save({ silent: false });
+      console.log("we in episode fetchin")
       for (let i = 1; i <= seasons; i++) {
         const seasonRes = await axios.get(
           `https://api.themoviedb.org/3/tv/${queriedShow["show_id"]}/season/${i}`,
           { params: { api_key: fastify.config.API_KEY } }
         );
         for (const episode of seasonRes.data["episodes"]) {
-          const foundEpisode = await Episode.findOne({
+          await prisma.Episode.upsert({
             where: {
               show_id: episode["show_id"],
               episode_number: episode["episode_number"],
               season_number: episode["season_number"],
             },
-          });
-          if (!foundEpisode) {
-            Episode.create({
+            update: {
+              name: episode["name"],
+              air_date: episode["air_date"],
+              episode_id: episode["id"],
+            },
+            create: {
               name: episode["name"],
               season_number: episode["season_number"],
               episode_number: episode["episode_number"],
               show_id: queriedShow["show_id"],
               air_date: episode["air_date"],
               episode_id: episode["id"],
-            });
-          } else {
-            // TODO: find a more elegant way to create or update
-            foundEpisode["air_date"] = episode["air_date"];
-            foundEpisode["name"] = episode["name"];
-            foundEpisode["episode_id"] = episode["id"];
-            // luckily, sequelize will transparently do nothing if there
-            // is nothing to save
-            foundEpisode.save();
-          }
+            }
+          });
         }
       }
     }
@@ -283,14 +180,14 @@ fastify.get("/lists", async (request, reply) => {
   const email = request?.query?.email;
   if (email) {
     return {
-      unauthedLists: await List.findAll({
+      unauthedLists: await prisma.List.findMany({
         where: {
-          email: {
-            [Op.ne]: email,
+          NOT: {
+            email: email,
           },
         },
       }),
-      authedLists: await List.findAll({
+      authedLists: await prisma.List.findMany({
         where: {
           email: email,
         },
@@ -298,7 +195,7 @@ fastify.get("/lists", async (request, reply) => {
     };
   }
   return {
-    unauthedLists: await List.findAll(),
+    unauthedLists: await prisma.List.findMany({take: 5}),
     authedLists: [],
   };
 });
@@ -311,11 +208,13 @@ fastify.get("/search", searchSchema, async (request, reply) => {
 });
 
 fastify.post("/create", listCreateSchema, async (request, reply) => {
-  await List.create({
-    name: request.body.name,
-    shows: JSON.stringify(request.body.shows),
-    email: request.body.email,
-  });
+  // await prisma.List.create({
+  //   data: {
+  //     name: request.body.name,
+  //     shows: JSON.stringify(request.body.shows),
+  //     email: request.body.email,
+  //   }
+  // });
   await fetchShows(request.body.shows);
   reply.code(200);
 });

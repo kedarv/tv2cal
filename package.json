@@ -13,6 +13,7 @@
   "dependencies": {
     "@fastify/cors": "^8.1.0",
     "@fastify/env": "^4.1.0",
+    "@prisma/client": "^4.8.1",
     "axios": "^0.27.2",
     "fastify": "^4.5.3",
     "ical-generator": "^3.5.1",
@@ -21,5 +22,7 @@
     "sqlite3": "^5.1.0"
   },
   "type": "module",
-  "devDependencies": {}
+  "devDependencies": {
+    "prisma": "^4.8.1"
+  }
 }
