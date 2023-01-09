@@ -307,7 +307,9 @@ fastify.get("/search", searchSchema, async (request, reply) => {
   const res = await axios.get(BASE_URL + "search/tv", {
     params: { api_key: fastify.config.API_KEY, query: request.query.search },
   });
-  return res.data["results"].filter((result) => result["vote_count"] > 10);
+  return res.data["results"]
+    .sort((resultA, resultB) => resultB["vote_count"] - resultA["vote_count"])
+    .filter((result) => result["vote_count"] > 2);
 });
 
 fastify.post("/create", listCreateSchema, async (request, reply) => {
